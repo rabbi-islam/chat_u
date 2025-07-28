@@ -1,8 +1,10 @@
+import 'package:chat_u/features/conversation/presentation/bloc/conversation_bloc.dart';
 import 'package:chat_u/theme/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class MessageScreen extends StatelessWidget {
-  const MessageScreen({super.key});
+class ConversationScreen extends StatelessWidget {
+  const ConversationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,27 +49,42 @@ class MessageScreen extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 10,),
+          SizedBox(height: 10),
           Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  color: DefaultsColor.messageListPage,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(50),
-                    topRight: Radius.circular(50)
-                  )
+            child: Container(
+              decoration: BoxDecoration(
+                color: DefaultsColor.messageListPage,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(50),
+                  topRight: Radius.circular(50),
                 ),
-                child: ListView(
-                  children: [
-                    _buildMessageTile("Rabbi Islam", "Hey! buddy", "05.20"),
-                    _buildMessageTile("Masum Biswash", "Hello mama, ki korish?", "04.20"),
-                    _buildMessageTile("Sajjad Hossain Sabbir SP", "Bhai ki koro?", "02.13"),
-                    _buildMessageTile("Joy", "Hey! buddy", "05.20"),
-                    _buildMessageTile("Muhammad Mijan", "Hey! buddy", "05.20"),
-                  ],
-                ),
-              )
-          )
+              ),
+              child: BlocBuilder<ConversationBloc, ConversationState>(
+                builder: (context, state) {
+                  if(state is ConversationLoading){
+                    return Center(child: CircularProgressIndicator(),);
+                  }else if(state is ConversationLoaded){
+                    return ListView.builder(
+                        itemCount: state.conversation.length,
+                        itemBuilder: (context, index){
+                          final conversations = state.conversation[index];
+                          return _buildMessageTile(
+                              conversations.participantName,
+                              conversations.lastMessage,
+                              conversations.lastMessageTime.toString()
+                          );
+                        }
+                    );
+                  }else if(state is ConversationLoadingFailed){
+                    return Center(child: Text(state.errorMessage),);
+                  }else{
+                    return Center(child: Text('No conversations found'),);
+                  }
+
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -91,10 +108,7 @@ class MessageScreen extends StatelessWidget {
         style: TextStyle(color: Colors.grey),
         overflow: TextOverflow.ellipsis,
       ),
-      trailing: Text(
-        time,
-        style: TextStyle(color: Colors.grey),
-      ),
+      trailing: Text(time, style: TextStyle(color: Colors.grey)),
     );
   }
 

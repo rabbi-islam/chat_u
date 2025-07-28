@@ -47,8 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
               BlocConsumer<AuthBloc, AuthState>(
                 listener: (context, state) {
                   if(state is AuthSuccess){
-                    Navigator.pushNamed(context, '/home');
-
+                    Navigator.pushNamedAndRemoveUntil(context, '/conversationScreen', (route)=> false);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Login success")));
                   }else if(state is AuthFailure){
                     debugPrint(state.failureMessage);
